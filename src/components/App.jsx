@@ -1,76 +1,106 @@
-import React, { Component } from 'react';
 import { nanoid } from 'nanoid';
-import Form from './Form/Form';
-import Filter from './Filter/Filter';
-import ContactList from './ContactList/ContactList';
-import ContactListElement from './ContactListElement/ContactListElement';
+import { useEffect, useState } from 'react';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
+const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
+  const [filter, setFilter] = useState('');
+  const [filteredContacts, setFilteredContacts] = useState([]);
+
+  useEffect(() => {
+    setFilteredContacts([
+      ...contacts.filter(contact =>
+        contact.name.toLowerCase().includes(filter.toLowerCase())
+      ),
+    ]);
+  }, [contacts, filter]);
+
+  const handleChangeNameInput = e => {
+    setName(e.target.value);
+  };
+  const handleChangeNumberInput = e => {
+    setNumber(e.target.value);
   };
 
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    if (this.state.contacts.find(c => c.name === e.target[0].value)) {
-      return alert(`${e.target[0].value} is already in contacts`);
+    if (contacts.find(contact => contact.name === name) === undefined) {
+      setContacts([...contacts, { name, number }]);
     } else {
-      return this.setState(prev => ({
-        contacts: [
-          ...prev.contacts,
-          {
-            id: nanoid(),
-            name: prev.name,
-            number: prev.number,
-          },
-        ],
-      }));
+      alert(`${e.target[0].value} is already in contact list`);
     }
   };
 
-  handleChange = e => {
-    const { value, name } = e.target;
-    this.setState({ [name]: value });
+  const handleChangeFilterInput = e => {
+    setFilter(e.target.value);
   };
 
-  handleDelete = contactToRemove => {
-    this.setState(prev => ({
-      contacts: prev.contacts.filter(c => c !== contactToRemove),
-    }));
-  };
-
-  render() {
-    const filteredContacts = this.state.contacts.filter(contact =>
-      contact.name.toLowerCase().includes(this.state.filter.toLowerCase())
+  const handleCLick = contactToDelete => {
+    setFilteredContacts(
+      filteredContacts.filter(contact => contact !== contactToDelete)
     );
+    setContacts(contacts.filter(contact => contact !== contactToDelete));
+  };
 
-    return (
-      <div>
-        <h1>Phonebook</h1>
-        <Form
-          name={this.state.name}
-          number={this.state.number}
-          change={this.handleChange}
-          submit={this.handleSubmit}
+  return (
+    <>
+      <h1>Phonebook</h1>
+      <>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Name
+            <input
+              type="text"
+              name="name"
+              value={name}
+              //  pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+              title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+              required
+              onChange={handleChangeNameInput}
+            />
+          </label>
+          <label>
+            Number
+            <input
+              type="tel"
+              name="number"
+              value={number}
+              //  pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+              title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+              required
+              onChange={handleChangeNumberInput}
+            />
+          </label>
+          <button type="submit">Add Contact</button>
+        </form>
+      </>
+      <h2>Contacts</h2>
+      <>
+        <p>Find contacts by name</p>
+        <input
+          type="tel"
+          name="filter"
+          value={filter}
+          title="Find contacts by name"
+          onChange={handleChangeFilterInput}
         />
-        <h2>Contacts</h2>
-        <Filter filter={this.state.filter} change={this.handleChange} />
-        <ContactList>
-          {filteredContacts.map(contact => {
-            const deleteContact = () => {
-              this.handleDelete(contact);
-            };
-            return (
-              <ContactListElement
-                key={nanoid()}
-                element={contact}
-                deleteElement={deleteContact}
-              />
-            );
-          })}
-        </ContactList>
-      </div>
-    );
-  }
-}
+      </>
+      <h1>Contact List</h1>
+      <>
+        <ul>
+          {filteredContacts.map(contact => (
+            <li key={nanoid()}>
+              <p>
+                {contact.name}: {contact.number}
+                <button onClick={() => handleCLick(contact)}>Delete</button>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </>
+    </>
+  );
+};
+
+export default App;
