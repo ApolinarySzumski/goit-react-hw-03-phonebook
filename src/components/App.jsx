@@ -3,45 +3,38 @@ import { useEffect, useState } from 'react';
 
 const App = () => {
   const [contacts, setContacts] = useState([]);
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-  const [filter, setFilter] = useState('');
   const [filteredContacts, setFilteredContacts] = useState([]);
-
-  useEffect(() => {
-    setFilteredContacts([
-      ...contacts.filter(contact =>
-        contact.name.toLowerCase().includes(filter.toLowerCase())
-      ),
-    ]);
-  }, [contacts, filter]);
-
-  const handleChangeNameInput = e => {
-    setName(e.target.value);
-  };
-  const handleChangeNumberInput = e => {
-    setNumber(e.target.value);
-  };
+  const [data, setData] = useState({
+    name: '',
+    number: '',
+    filter: '',
+  });
 
   const handleSubmit = e => {
     e.preventDefault();
-    if (contacts.find(contact => contact.name === name) === undefined) {
-      setContacts([...contacts, { name, number }]);
+    if (contacts.find(contact => contact.name === data.name) === undefined) {
+      setContacts([...contacts, data]);
     } else {
       alert(`${e.target[0].value} is already in contact list`);
     }
   };
 
-  const handleChangeFilterInput = e => {
-    setFilter(e.target.value);
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCLick = contactToDelete => {
-    setFilteredContacts(
-      filteredContacts.filter(contact => contact !== contactToDelete)
-    );
+  const handleDelete = contactToDelete => {
     setContacts(contacts.filter(contact => contact !== contactToDelete));
   };
+
+  useEffect(() => {
+    setFilteredContacts(
+      contacts.filter(contact =>
+        contact.name.toLowerCase().includes(data.filter.toLowerCase())
+      )
+    );
+  }, [contacts, data.filter]);
 
   return (
     <>
@@ -53,11 +46,11 @@ const App = () => {
             <input
               type="text"
               name="name"
-              value={name}
+              value={data.name}
               //  pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
               title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
               required
-              onChange={handleChangeNameInput}
+              onChange={handleChange}
             />
           </label>
           <label>
@@ -65,11 +58,11 @@ const App = () => {
             <input
               type="tel"
               name="number"
-              value={number}
+              value={data.number}
               //  pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
               title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
               required
-              onChange={handleChangeNumberInput}
+              onChange={handleChange}
             />
           </label>
           <button type="submit">Add Contact</button>
@@ -79,11 +72,11 @@ const App = () => {
       <>
         <p>Find contacts by name</p>
         <input
-          type="tel"
+          type="text"
           name="filter"
-          value={filter}
+          value={data.filter}
           title="Find contacts by name"
-          onChange={handleChangeFilterInput}
+          onChange={handleChange}
         />
       </>
       <h1>Contact List</h1>
@@ -93,7 +86,7 @@ const App = () => {
             <li key={nanoid()}>
               <p>
                 {contact.name}: {contact.number}
-                <button onClick={() => handleCLick(contact)}>Delete</button>
+                <button onClick={() => handleDelete(contact)}>Delete</button>
               </p>
             </li>
           ))}
