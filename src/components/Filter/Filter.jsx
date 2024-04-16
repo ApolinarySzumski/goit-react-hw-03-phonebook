@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types';
 
-export const Filter = ({ data, handleChange }) => {
+export const Filter = ({ filter, handleChange }) => {
   return (
     <>
       <p>Find contacts by name</p>
       <input
         type="text"
         name="filter"
-        value={data.filter}
+        value={filter}
         title="Find contacts by name"
         onChange={handleChange}
       />
@@ -16,6 +16,6 @@ export const Filter = ({ data, handleChange }) => {
 };
 
 Filter.propTypes = {
-  data: PropTypes.objectOf(PropTypes.string),
+  filter: PropTypes.string,
   handleChange: PropTypes.func,
 };
